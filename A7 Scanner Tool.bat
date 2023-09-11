@@ -34,29 +34,20 @@ echo                         IP Address : %TargetIP%
 echo.
 echo.
 if not exist "A7 Scanner Tool Results" md "A7 Scanner Tool Results"
-nmap -A "%TargetIP%"> "A7 Scanner Tool Results\%TargetIP%.txt"
+nmap -sV "%TargetIP%"> "A7 Scanner Tool Results\%TargetIP%.txt"
 type "A7 Scanner Tool Results\%TargetIP%.txt"
-echo.
 echo.
 echo ----End of the scan----
 echo.
-echo.
-%windir%\System32\choice.exe /m "Did you find any vulnerabilities?"
-IF %ERRORLEVEL% EQU 1 goto yes
-IF %ERRORLEVEL% EQU 2 goto restart
-
-:yes
+echo If you find any vulnerability, list it here, and if you don't find a vulnerability, press the ENTER button directly
 set /p search=Type the name of the vulnerability:
 set search=%search: =+%
-start www.google.com/search?q=%search%+vulnerabilities
-echo.
+start www.google.com/search?q=%search%+vulnerabilities+site:rapid7.com
 echo.
 echo ---End of Tool---
-
 :loop
 pause > nul
 goto loop
-
 :restart
 cls
 echo  +---------------------------------------------------------------------+
