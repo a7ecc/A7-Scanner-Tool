@@ -17,13 +17,15 @@ echo.
 echo.
 for /f "tokens=2,3 delims={,}" %%a in ('"WMIC NICConfig where IPEnabled="True" get DefaultIPGateway /value | find "I" "') do if not defined ip set ip=%%~a
 set ip3=%ip:~0,-1%
-nmap -sn %ip%/24 | findstr /v /l "Host is up" | findstr /v /l "addresses" | findstr /v /l "Starting" > "%temp%\Network Devices"
+nmap -sn %ip%/24 -oN "%temp%\Network Devices" | findstr /v /l "Host is up" | findstr /v /l "addresses" | findstr /v /l "Starting"
+goto start2
 :restart1
-type "%temp%\Network Devices"
+type "%temp%\Network Devices" | findstr /v /l "Host is up" | findstr /v /l "addresses" | findstr /v /l "Starting" | findstr /v /l "#"
+:start2
 echo.
 echo.
 :ReEnterTargetIP
-set /p TargetIP=Type the last three digits of the target's IP address:
+set /p TargetIP=Type the last three digits of the target IP address:
 if "%TargetIP%"=="" goto ReEnterTargetIP
 if defined TargetIP if "%TargetIP:~3,1%"=="" (goto true) else (goto ReEnterTargetIP)
 :true
@@ -36,20 +38,16 @@ echo                         IP Address : %ip3%%TargetIP%
 echo.
 echo.
 if not exist "A7 Scanner Tool Results" md "A7 Scanner Tool Results"
-nmap -sV "%ip3%%TargetIP%"> "A7 Scanner Tool Results\%ip3%%TargetIP%.txt"
-type "A7 Scanner Tool Results\%ip3%%TargetIP%.txt"
+nmap -O -sV --script "vulners" "%ip3%%TargetIP%" -oN "A7 Scanner Tool Results\%ip3%%TargetIP%.txt"
+echo.
 echo ----End of the scan----
 echo.
 echo.
-echo If you find any vulnerability, list it here, and if you don't find a vulnerability, press the ENTER button directly
-echo.
-:research
-set search=
-set /p search=Type the name of the vulnerability:
-if "%search%"=="" goto restart
-set search=%search: =+%
-start https://www.google.com/search?q=%search%+vulnerabilities
-goto research
+:loopend
+pause > nul
+%windir%\System32\choice.exe /m "Do you want to go back to the home page?"
+IF %ERRORLEVEL% EQU 1 goto restart
+IF %ERRORLEVEL% EQU 2 goto loopend
 :restart
 cls
 echo  +---------------------------------------------------------------------+
